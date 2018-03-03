@@ -1,4 +1,5 @@
 var polygonDrawn = false;
+var mouseInsideCircle = false;
 
 function getPixelsFromFloat(value)
 {
@@ -8,13 +9,16 @@ function getPixelsFromFloat(value)
 
 function hideCircle(circle)
 {
-  circle.style.display = 'none';
+  if (!mouseInsideCircle)
+  {
+    circle.style.display = 'none';
+  }
 }
 
 
 function hidePolygon(multiimage)
 {
-  if (polygonDrawn)
+  if (!mouseInsideCircle)
   {
     for (var i = 1; i < multiimage.children.length; ++i)
     {
@@ -54,12 +58,14 @@ function drawCircle(multiimage, centerTop, centerLeft, r, polygonImageSize)
   else
   {
     var circle = document.createElement("div");
-    circle.addEventListener("click", function (){ clickThroughCircle(circle); });
-    circle.addEventListener("mouseleave", function () { setTimeout(function ()
-                                                        { hideCircle(circle); }, 1200);
-                                                        setTimeout(function ()
-                                                        { hidePolygon(multiimage); }, 1200)});
     multiimage.appendChild(circle);
+    circle.addEventListener("click", function (){ clickThroughCircle(circle); });
+    circle.addEventListener("mouseleave", function () { mouseInsideCircle = false;
+                                                        setTimeout(function ()
+                                                      { hideCircle(circle); }, 1200);
+                                                        setTimeout(function ()
+                                                      { hidePolygon(multiimage); }, 1200)});
+    circle.addEventListener("mouseenter", function () { mouseInsideCircle = true; });
   }
   circle.style.display = '';
   circle.style.position = 'absolute';
@@ -99,7 +105,6 @@ function drawPolygon()
       drawPolygonImage(multiimage.children[i + 1], topOffset, leftOffset);
     }
     polygonDrawn = true;
-    console.log(polygonDrawn);
   }
 }
 
@@ -116,4 +121,5 @@ function blackCircle()
 
 
 var multiimage = Array.from(document.getElementsByClassName('multiimage'));
+multiimage.forEach(hidePolygon);
 multiimage.forEach(addListeners);
