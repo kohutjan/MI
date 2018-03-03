@@ -1,5 +1,9 @@
-var polygonDrawn = false;
+var polygonDrawn = true;
 var mouseInsideCircle = false;
+var idleTimer;
+var mouseMoved = false;
+
+var multiimages = [];
 
 function getPixelsFromFloat(value)
 {
@@ -7,25 +11,51 @@ function getPixelsFromFloat(value)
 }
 
 
-function hideCircle(circle)
+function isCircleInMultiimage(multiimageElement)
 {
-  if (!mouseInsideCircle)
-  {
-    circle.style.display = 'none';
-  }
+  var circleDiv = multiimageElement.getElementsByTagName('div');
+  return (typeof circleDiv !== 'undefined' && circleDiv.length > 0)
+}
+
+
+function getCircleFromMultiimage(multiimageElement)
+{
+  return multiimageElement.getElementsByTagName('div')[0];
 }
 
 
 function hidePolygon(multiimage)
 {
-  if (!mouseInsideCircle)
+  if (!multiimage['mouseInsideCircle'] && multiimage['polygonDrawn'])
   {
-    for (var i = 1; i < multiimage.children.length; ++i)
+    console.log("hiding multiimage");
+    if (isCircleInMultiimage(multiimage['element']))
     {
-      multiimage.children[i].style.display = 'none';
+      var circle = getCircleFromMultiimage(multiimage['element']);
+      circle.style.display = 'none';
     }
-    polygonDrawn = false;
+    for (var i = 1; i < multiimage['element'].children.length; ++i)
+    {
+      multiimage['element'].children[i].style.display = 'none';
+    }
+    multiimage['polygonDrawn'] = false;
   }
+}
+
+
+function setMouseInsideCircleToFalse(multiimage)
+{
+  multiimage['mouseInsideCircle'] = false;
+}
+
+
+function inactiveHidePolygons()
+{
+  console.log("clearTimer");
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(function () { multiimages.forEach(setMouseInsideCircleToFalse);
+                                       multiimages.forEach(hidePolygon);},
+                                       2000);
 }
 
 
@@ -50,22 +80,19 @@ function clickThroughCircle(circle)
 
 function drawCircle(multiimage, centerTop, centerLeft, r, polygonImageSize)
 {
-  var circleDiv = multiimage.getElementsByTagName('div');
-  if (typeof circleDiv !== 'undefined' && circleDiv.length > 0)
+  if (isCircleInMultiimage(multiimage['element']))
   {
-    var circle = circleDiv[0];
+    var circle = getCircleFromMultiimage(multiimage['element']);
   }
   else
   {
-    var circle = document.createElement("div");
-    multiimage.appendChild(circle);
-    circle.addEventListener("click", function (){ clickThroughCircle(circle); });
-    circle.addEventListener("mouseleave", function () { mouseInsideCircle = false;
-                                                        setTimeout(function ()
-                                                      { hideCircle(circle); }, 1200);
+    var circle = document.createElement('div');
+    multiimage['element'].appendChild(circle);
+    circle.addEventListener('click', function (){ clickThroughCircle(circle); });
+    circle.addEventListener('mouseleave', function () { multiimage['mouseInsideCircle'] = false;
                                                         setTimeout(function ()
                                                       { hidePolygon(multiimage); }, 1200)});
-    circle.addEventListener("mouseenter", function () { mouseInsideCircle = true; });
+    circle.addEventListener('mouseenter', function () { multiimage['mouseInsideCircle'] = true; });
   }
   circle.style.display = '';
   circle.style.position = 'absolute';
@@ -79,13 +106,12 @@ function drawCircle(multiimage, centerTop, centerLeft, r, polygonImageSize)
 }
 
 
-function drawPolygon()
+function drawPolygon(multiimage)
 {
-  if (!polygonDrawn)
+  if (!multiimage['polygonDrawn'])
   {
     var r = 250;
-    var multiimage = this;
-    var firstImage = multiimage.firstElementChild.firstElementChild;
+    var firstImage = multiimage['element'].firstElementChild.firstElementChild;
     var firstImagePosition = firstImage.getBoundingClientRect();
     var scrollTop  = window.pageYOffset || document.documentElement.scrollTop;
     var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
@@ -93,7 +119,7 @@ function drawPolygon()
     var centerLeft = firstImagePosition.left + scrollLeft;
     var polygonImageSize = firstImagePosition.right - firstImagePosition.left;
     drawCircle(multiimage, centerTop, centerLeft, r, polygonImageSize);
-    var polygonImagesLength = multiimage.children.length - 2;
+    var polygonImagesLength = multiimage['element'].children.length - 2;
     var alfa = 2 * Math.PI / polygonImagesLength;
     for (var i = 0; i < polygonImagesLength; ++i)
     {
@@ -102,24 +128,31 @@ function drawPolygon()
       var relativeLeftOffset = r * Math.cos(actualAlfa);
       var topOffset = centerTop - relativeTopOffset;
       var leftOffset = centerLeft - relativeLeftOffset;
-      drawPolygonImage(multiimage.children[i + 1], topOffset, leftOffset);
+      drawPolygonImage(multiimage['element'].children[i + 1], topOffset, leftOffset);
     }
-    polygonDrawn = true;
+    multiimage['polygonDrawn'] = true;
   }
 }
 
 
 function addListeners(multiimage)
 {
-  multiimage.addEventListener("mouseover", drawPolygon);
+  multiimage['element'].addEventListener('mouseover', function () { drawPolygon(multiimage);});
 }
 
-function blackCircle()
+function initMultiimages()
 {
-  this.style.background = 'black';
+  var multiimagesElements = Array.from(document.getElementsByClassName('multiimage'));
+  for (var i = 0; i < multiimagesElements.length; ++i)
+  {
+    multiimages.push({element: multiimagesElements[i],
+                      polygonDrawn: true,
+                      mouseInsideCircle: false});
+  }
 }
 
 
-var multiimage = Array.from(document.getElementsByClassName('multiimage'));
-multiimage.forEach(hidePolygon);
-multiimage.forEach(addListeners);
+initMultiimages();
+multiimages.forEach(addListeners);
+multiimages.forEach(hidePolygon);
+document.body.addEventListener('mousemove', function () { inactiveHidePolygons(); });
