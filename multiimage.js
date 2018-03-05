@@ -8,7 +8,7 @@ radius - distence of images from the center image in px
 startRadius - distence in which to start animationStep in px
 animationStep - step of animation in px
 circleTimeToHidePolygon - time to hiding images when area of images is left in mlsec
-inactiveHidePolygons - time to hide images when mouse is inactive in mlsec 
+inactiveHidePolygons - time to hide images when mouse is inactive in mlsec
 */
 var radius = 250;
 var startRadius = 150;
@@ -19,47 +19,6 @@ var inactivityTimeToHidePolygon = 2000;
 
 var timerIdle;
 var multiimages = [];
-
-var cssImageWrapper = {
-                        position: 'fixed',
-                        top: '0',
-                        bottom: '0',
-                        left: '0',
-                        right: '0',
-                        maxWidth: '100%',
-                        maxHeight: '100%',
-                        background: 'black',
-                        zIndex: '100',
-                      };
-var cssImageToShow = {
-                       position: 'fixed',
-                       top: '0',
-                       bottom: '0',
-                       left: '0',
-                       right: '0',
-                       maxWidth: '100%',
-                       maxHeight: '100%',
-                       margin: 'auto',
-                       overflow: 'auto',
-                       zIndex: '101',
-                     };
-var cssCloseButton = {
-                       position: 'absolute',
-                       right: '0',
-                       backgroundRepeat: 'no-repeat',
-                       background: 'rgba(219,221,224,0.4)',
-                       border: 'none',
-                       borderRadius: '30px',
-                       cursor: 'pointer',
-                       overflow: 'hidden',
-                       outline: 'none',
-                       color: 'white',
-                       height: '50px',
-                       width: '50px',
-                       fontSize: '40px',
-                       margin: '10px',
-                       zIndex: '102',
-                     };
 
 
 function getPixelsFromFloat(value)
@@ -93,31 +52,30 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
     self.timerOutsideCircle = setTimeout(function () { self.animateHidePolygon(); }, circleTimeToHidePolygon);
   }
 
-  self.drawShowImage = function (imageWrapper, imageToShow, closeButton)
-  {
-    Object.assign(imageWrapper.style, cssImageWrapper);
-    Object.assign(imageToShow.style, cssImageToShow);
-    Object.assign(closeButton.style, cssCloseButton);
-    closeButton.addEventListener('mouseenter', function() { closeButton.style.color = 'black'});
-    closeButton.addEventListener('mouseleave', function() { closeButton.style.color = 'white'});
-    self.imageShown = true;
-  }
-
-  self.clickThroughCircle = function ()
+  self.drawShowImage = function ()
   {
     self.circle.style.display = 'none';
     var image = document.elementFromPoint(event.clientX , event.clientY).parentElement;
-    var imageWrapper = document.createElement('DIV');
-    var imageToShow = document.createElement('IMG');
-    var closeButton = document.createElement('BUTTON');
-    var cross = document.createTextNode('X');
-    imageToShow.setAttribute('src', image.getAttribute('href'));
-    self.element.appendChild(imageWrapper);
-    imageWrapper.appendChild(imageToShow);
-    imageWrapper.appendChild(closeButton);
-    closeButton.appendChild(cross);
-    closeButton.addEventListener('click', function () { self.hideShowImage(imageWrapper) })
-    self.drawShowImage(imageWrapper, imageToShow, closeButton);
+    //check if it has been clicked on image
+    if (image.parentNode == self.element)
+    {
+      var imageWrapper = document.createElement('DIV');
+      var imageToShow = document.createElement('IMG');
+      var closeButton = document.createElement('BUTTON');
+      var cross = document.createTextNode('X');
+      imageWrapper.setAttribute('class', 'image_wrapper');
+      imageToShow.setAttribute('class', 'image_to_show');
+      closeButton.setAttribute('class', 'close_button');
+      imageToShow.setAttribute('src', image.getAttribute('href'));
+      self.element.appendChild(imageWrapper);
+      imageWrapper.appendChild(imageToShow);
+      imageWrapper.appendChild(closeButton);
+      closeButton.appendChild(cross);
+      closeButton.addEventListener('click', function () { self.hideShowImage(imageWrapper) })
+      closeButton.addEventListener('mouseenter', function() { closeButton.style.color = 'black'});
+      closeButton.addEventListener('mouseleave', function() { closeButton.style.color = 'white'});
+      self.imageShown = true;
+    }
     self.circle.style.display = '';
   }
 
@@ -170,8 +128,9 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
     if (self.circle == null)
     {
       self.circle = document.createElement('DIV');
+      self.circle.setAttribute('class', 'circle');
       self.element.appendChild(self.circle);
-      self.circle.addEventListener('click', function () { self.clickThroughCircle(); });
+      self.circle.addEventListener('click', function () { self.drawShowImage(); });
       self.circle.addEventListener('mouseleave', function () { self.mouseInsideCircle = false;
                                                                self.timerOutsideCircle = setTimeout(function ()
                                                              { self.animateHidePolygon(); }, circleTimeToHidePolygon) });
@@ -182,9 +141,6 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
     Object.assign(self.circle.style,
                  {
                    display: '',
-                   position: 'absolute',
-                   zIndex: '1',
-                   cursor: 'pointer',
                    top: getPixelsFromFloat(centerTop - self.r),
                    left: getPixelsFromFloat(centerLeft - self.r),
                    width: circleDiameter,

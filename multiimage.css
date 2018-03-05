@@ -17,3 +17,57 @@ span.multiimage > a
       border-radius: 25px;
       background: red;
     }
+
+span.multiimage > div.circle
+{
+  position: absolute;
+  z-index: 1;
+  cursor: pointer;
+}
+
+
+span.multiimage > div.image_wrapper
+{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 100%;
+  background: black;
+  z-index: 100;
+}
+
+span.multiimage > div.image_wrapper > img.image_to_show
+{
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+  overflow: auto;
+  z-index: 101;
+}
+
+span.multiimage > div.image_wrapper > button.close_button
+{
+  position: absolute;
+  right: 0;
+  background-repeat: no-repeat;
+  background: rgba(219,221,224,0.4);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+  color: white;
+  height: 50px;
+  width: 50px;
+  font-size: 40px;
+  margin: 10px;
+  z-index: 102;
+}
