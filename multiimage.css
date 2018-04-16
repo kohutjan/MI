@@ -1,3 +1,4 @@
+/*Margin left is set so the multiimage is shift to the left*/
 span.multiimage > a:first-child > img
 {
   margin-left: 500px;
@@ -53,6 +54,7 @@ span.multiimage > div.image_wrapper > img.image_to_show
   z-index: 101;
 }
 
+/*Parameters for close button.*/
 span.multiimage > div.image_wrapper > button.close_button
 {
   position: absolute;

@@ -72,6 +72,7 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
       imageWrapper.appendChild(closeButton);
       closeButton.appendChild(cross);
       closeButton.addEventListener('click', function (event) { self.hideShowImage(imageWrapper) })
+      //Color of close button
       closeButton.addEventListener('mouseenter', function(event) { closeButton.style.color = 'black'});
       closeButton.addEventListener('mouseleave', function(event) { closeButton.style.color = 'white'});
       self.imageShown = true;
