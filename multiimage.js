@@ -13,7 +13,7 @@ inactiveHidePolygons - time to hide images when mouse is inactive in mlsec
 var radius = 250;
 var startRadius = 150;
 var animationStep = 10;
-var animationSpeed = 20;
+var animationSpeed = 10;
 var circleTimeToHidePolygon = 2000;
 var inactivityTimeToHidePolygon = 2000;
 
@@ -49,10 +49,10 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
     self.element.removeChild(imageWrapper);
     self.imageShown = false;
     clearTimeout(self.timerOutsideCircle);
-    self.timerOutsideCircle = setTimeout(function () { self.animateHidePolygon(); }, circleTimeToHidePolygon);
+    self.timerOutsideCircle = setTimeout(function (event) { self.animateHidePolygon(); }, circleTimeToHidePolygon);
   }
 
-  self.drawShowImage = function ()
+  self.drawShowImage = function (event)
   {
     self.circle.style.display = 'none';
     var image = document.elementFromPoint(event.clientX , event.clientY).parentElement;
@@ -71,9 +71,9 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
       imageWrapper.appendChild(imageToShow);
       imageWrapper.appendChild(closeButton);
       closeButton.appendChild(cross);
-      closeButton.addEventListener('click', function () { self.hideShowImage(imageWrapper) })
-      closeButton.addEventListener('mouseenter', function() { closeButton.style.color = 'black'});
-      closeButton.addEventListener('mouseleave', function() { closeButton.style.color = 'white'});
+      closeButton.addEventListener('click', function (event) { self.hideShowImage(imageWrapper) })
+      closeButton.addEventListener('mouseenter', function(event) { closeButton.style.color = 'black'});
+      closeButton.addEventListener('mouseleave', function(event) { closeButton.style.color = 'white'});
       self.imageShown = true;
     }
     self.circle.style.display = '';
@@ -95,7 +95,7 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
   {
     if (!self.mouseInsideCircle && self.polygonDrawn && !self.imageShown)
     {
-      setTimeout(function ()
+      setTimeout(function (event)
       {
         if (self.animateHideBuffer >= self.startR)
         {
@@ -130,11 +130,11 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
       self.circle = document.createElement('DIV');
       self.circle.setAttribute('class', 'circle');
       self.element.appendChild(self.circle);
-      self.circle.addEventListener('click', function () { self.drawShowImage(); });
-      self.circle.addEventListener('mouseleave', function () { self.mouseInsideCircle = false;
-                                                               self.timerOutsideCircle = setTimeout(function ()
+      self.circle.addEventListener('click', function (event) { self.drawShowImage(event); });
+      self.circle.addEventListener('mouseleave', function (event) { self.mouseInsideCircle = false;
+                                                               self.timerOutsideCircle = setTimeout(function (event)
                                                              { self.animateHidePolygon(); }, circleTimeToHidePolygon) });
-      self.circle.addEventListener('mouseenter', function () { self.mouseInsideCircle = true; });
+      self.circle.addEventListener('mouseenter', function (event) { self.mouseInsideCircle = true; });
     }
     var circleRadius = getPixelsFromFloat(self.r + polygonImageSize);
     var circleDiameter = getPixelsFromFloat(2 * self.r + polygonImageSize);
@@ -174,11 +174,11 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
     }
   }
 
-  self.animateDrawPolygon = function ()
+  self.animateDrawPolygon = function (event)
   {
     if (!self.polygonDrawn && !self.mouseInTheMiddle)
     {
-      setTimeout(function ()
+      setTimeout(function (event)
       {
         if (self.animateDrawBuffer <= self.r)
         {
@@ -203,7 +203,7 @@ function Multiimage(element, polygonDrawn, mouseInsideCircle, timerOutsideCircle
   self.init = function ()
   {
     var firstImage = self.element.firstElementChild.firstElementChild;
-    firstImage.addEventListener('mouseenter', function () { self.animateDrawPolygon(); });
+    firstImage.addEventListener('mouseenter', function (event) { self.animateDrawPolygon(); });
   }
 
 }
@@ -221,12 +221,12 @@ checkMouseInTheMiddle = function (multiimage, x, y)
   }
 }
 
-function inactiveHidePolygons()
+function inactiveHidePolygons(event)
 {
   var x = event.clientX;
   var y = event.clientY;
   clearTimeout(timerIdle);
-  timerIdle = setTimeout(function () { for (var i = 0; i < multiimages.length; ++i)
+  timerIdle = setTimeout(function (event) { for (var i = 0; i < multiimages.length; ++i)
                                        {
                                          checkMouseInTheMiddle(multiimages[i], x, y);
                                          multiimages[i].mouseInsideCircle = false;
@@ -260,4 +260,4 @@ for (var i = 0; i < multiimages.length; ++i)
   multiimages[i].init();
   multiimages[i].hidePolygon();
 }
-document.body.addEventListener('mousemove', function () { inactiveHidePolygons(); });
+document.body.addEventListener('mousemove', function (event) { inactiveHidePolygons(event); });
